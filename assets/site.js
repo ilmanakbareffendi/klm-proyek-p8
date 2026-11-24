@@ -1,2 +1,0 @@
-document.querySelectorAll('.copy').forEach(b=>b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.copy);b.textContent='Tersalin';}catch(e){const r=document.createRange();r.selectNodeContents(b.previousElementSibling);const s=getSelection();s.removeAllRanges();s.addRange(r);b.textContent='Tekan Ctrl+C';}setTimeout(()=>b.textContent='Salin',1800);}));
-const on=document.querySelector('.tab.on');if(on)on.scrollIntoView({block:'nearest',inline:'center'});
