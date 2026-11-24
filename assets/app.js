@@ -91,4 +91,44 @@ if(gate&&!document.documentElement.classList.contains('nogate')){
     await anim(1150,p=>{const e=ease.io(p);setStar(120+(Rmax-120)*e,.35*e,Math.max(0,1-p*3));ov.style.opacity=p<.85?1:1-(p-.85)/.15;});
     done();}
 }
+
+// ===== partikel: muncul tiba-tiba, melayang, lalu meledak (bintang tajam + tanda plus) =====
+(function(){
+  if(RM)return;
+  const base=(document.querySelector('link[href*="assets/app.css"]').getAttribute('href').split('assets/')[0])+'assets/ic/';
+  const ICONS=['c','d','cv','folder','a','b','e','play','poster','phone','team','upload'];
+  const PAL=['#ffc83d','#ff6fae','#2f6bff','#4ade80','#6d4aff','#e8553a','#5eead4'];
+  const starSvg=c=>`<svg viewBox="0 0 24 24"><path d="M12 1.8l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17l-6.1 3.4 1.4-6.8L2.2 8.9l6.9-.8z" fill="${c}" stroke="#1d1b2e" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+  const plusSvg=c=>`<svg viewBox="0 0 24 24"><path d="M9 2h6v7h7v6h-7v7H9v-7H2V9h7z" fill="${c}" stroke="#1d1b2e" stroke-width="2" stroke-linejoin="round"/></svg>`;
+  const R=(a,b)=>a+Math.random()*(b-a);
+  function spiky(n,r1,r2,jit){let d='';for(let i=0;i<n*2;i++){const a=i*Math.PI/n,r=(i%2?r2:r1)*(i%2?1:R(1-jit,1+jit));d+=(i?'L':'M')+(50+Math.cos(a)*r).toFixed(1)+' '+(50+Math.sin(a)*r).toFixed(1);}return d+'Z';}
+  function boom(layer,x,y,s){
+    const f=document.createElement('div');f.className='flash';f.style.left=x+'px';f.style.top=y+'px';f.style.setProperty('--s',(s*2.6)+'px');
+    const c1=PAL[Math.floor(Math.random()*PAL.length)];
+    f.innerHTML=`<svg viewBox="0 0 100 100"><path class="b1" d="${spiky(9,48,20,.25)}" fill="${c1}" stroke="#1d1b2e" stroke-width="3.5" stroke-linejoin="miter"/><path class="b2" d="${spiky(7,30,12,.3)}" fill="#fff" stroke="#1d1b2e" stroke-width="3" stroke-linejoin="miter"/></svg>`;
+    layer.appendChild(f);setTimeout(()=>f.remove(),600);
+    const n=6+Math.floor(Math.random()*3);
+    for(let i=0;i<n;i++){const p=document.createElement('div');p.className='plus';const a=i/n*Math.PI*2+R(-.3,.3),d=R(s*1.4,s*2.6);
+      p.style.left=x+'px';p.style.top=y+'px';p.style.setProperty('--s',R(12,22)+'px');p.style.setProperty('--dx',Math.cos(a)*d+'px');p.style.setProperty('--dy',Math.sin(a)*d+'px');
+      p.innerHTML=i%3===2?starSvg(PAL[(i+2)%PAL.length]):plusSvg(PAL[(i+1)%PAL.length]);layer.appendChild(p);setTimeout(()=>p.remove(),750);}
+    for(let i=0;i<8;i++){const l=document.createElement('div');l.className='spd';l.style.left=x+'px';l.style.top=y+'px';l.style.width=R(10,22)+'px';l.style.setProperty('--a',(i*45+R(-10,10))+'deg');l.style.setProperty('--d',(s*R(1.2,1.9))+'px');layer.appendChild(l);setTimeout(()=>l.remove(),400);}
+  }
+  function slot(box,mob){ // posisi di pinggir agar teks utama tetap terbaca
+    const W=box.clientWidth,H=box.clientHeight,side=Math.random()<.5;
+    const edge=mob?.13:.17;let x=side?R(.02,edge)*W:R(1-edge,.98)*W,y=R(.08,.92)*H;
+    if(!mob&&Math.random()<.25){x=R(.25,.75)*W;y=Math.random()<.5?R(.0,.06)*H:R(.95,1)*H;}
+    return [x,y];}
+  function run(box,count){
+    const layer=document.createElement('div');layer.className='fxl';box.prepend(layer);
+    const spawn=()=>{if(document.hidden){setTimeout(spawn,1500);return;}
+      const mob=innerWidth<700,s=mob?R(30,40):R(42,64),[x,y]=slot(box,mob);
+      const el=document.createElement('div');el.className='pt';el.style.left=x+'px';el.style.top=y+'px';el.style.setProperty('--s',s+'px');el.style.setProperty('--r',R(-18,18)+'deg');
+      const k=Math.random();el.innerHTML='<div class="fl">'+(k<.35?starSvg(PAL[Math.floor(Math.random()*PAL.length)]):`<img src="${base}${ICONS[Math.floor(Math.random()*ICONS.length)]}.svg" alt="">`)+'</div>';
+      layer.appendChild(el);
+      setTimeout(()=>{el.classList.add('boom');setTimeout(()=>{boom(layer,x,y,s);el.remove();},180);setTimeout(spawn,R(500,1600));},R(2400,4600));};
+    for(let i=0;i<count;i++)setTimeout(spawn,300+i*R(500,900));
+  }
+  const start=()=>document.querySelectorAll('.hero,.lhead,.ihero').forEach(b=>run(b,b.classList.contains('hero')?(innerWidth<700?4:8):(innerWidth<700?3:5)));
+  if(document.getElementById('gate')&&!document.documentElement.classList.contains('nogate')){const t=setInterval(()=>{if(!document.getElementById('gate')){clearInterval(t);start();}},300);}else start();
+})();
 })();
