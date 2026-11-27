@@ -65,3 +65,9 @@ function kt(gate){
     const t=Math.floor(T0*12+1e-6)/12;if(t!==last){last=t;draw(t)}requestAnimationFrame(f)})
 }
 const R=T("#gate");R&&G.classList.contains("gating")?(R.addEventListener("touchmove",t=>t.preventDefault(),{passive:!1}),T(".start",R).addEventListener("click",Rt,{once:!0})):(R&&R.remove(),ct());function ht(){G.classList.remove("gating","reveal"),G.classList.add("nogate"),ct()}function Rt(){try{sessionStorage.setItem("ap17-gate","1")}catch{}if(/intro=1/.test(location.search)&&history.replaceState(null,"",location.pathname+location.hash),scrollTo(0,0),R.classList.add("go"),X){R.remove(),ht();return}kt(R)}})();
+(()=>{const T=[...document.querySelectorAll(".ktab")];if(!T.length)return;
+const sel=(id,save)=>{for(const b of T){const on=b.id==="tab-"+id;b.setAttribute("aria-selected",on);b.tabIndex=on?0:-1;document.getElementById(b.getAttribute("aria-controls")).hidden=!on}
+ if(save){history.replaceState(null,"","#"+id);try{localStorage.setItem("ap17-kelas",id)}catch{}}};
+T.forEach((b,i)=>{b.addEventListener("click",()=>sel(b.id.slice(4),1));b.addEventListener("keydown",e=>{if(e.key!=="ArrowRight"&&e.key!=="ArrowLeft")return;e.preventDefault();const n=T[(i+(e.key==="ArrowRight"?1:T.length-1))%T.length];n.focus();n.click()})});
+let h=location.hash.slice(1);if(h!=="pagi"&&h!=="malam"){try{h=localStorage.getItem("ap17-kelas")}catch{}}
+sel(h==="malam"?"malam":"pagi",0);addEventListener("hashchange",()=>{const x=location.hash.slice(1);if(x==="pagi"||x==="malam")sel(x,0)})})();
